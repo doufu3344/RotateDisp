@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>pic/logo.png</file>
+        <file>pic/monitor-d.png</file>
+        <file>pic/monitor-l.png</file>
+        <file>pic/monitor-r.png</file>
+        <file>pic/monitor-u.png</file>
+        <file>pic/logo-yellow.png</file>
+        <file>pic/logo-green.png</file>
+        <file>pic/logo-red.png</file>
+        <file>pic/end.png</file>
+    </qresource>
+</RCC>
