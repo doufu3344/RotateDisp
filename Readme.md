@@ -16,3 +16,6 @@
 
 软件依赖 *Qt* 环境。
 
+## 界面
+
+![RotateDisp](https://github.com/doufu3344/RotateDisp/blob/main/RotateDisp.png)
