@@ -92,6 +92,18 @@ RotateDisp::RotateDisp()
     getDefSize(NULL, m_defSzie);
 }
 
+RotateDisp::RotateDisp(QString name)
+{
+    wchar_t dev[256] = { 0 };
+    wchar_t* pDev = dev;
+    if (!name.isEmpty())
+        name.toWCharArray(dev);
+    else
+        pDev = NULL;
+
+    getDefSize(pDev, m_defSzie);
+}
+
 QString RotateDisp::errmsg()
 {
     return m_sErrinf;
@@ -122,7 +134,11 @@ bool RotateDisp::rotate(QString name, RotateDisp::ROTATE r)
     // Init DEVMODE to current settings
     ZeroMemory(&devMode, sizeof(DEVMODE));
     devMode.dmSize = sizeof(devMode);
-    EnumDisplaySettingsEx(pDev, ENUM_CURRENT_SETTINGS, &devMode, NULL);
+    int result = EnumDisplaySettingsEx(pDev, ENUM_CURRENT_SETTINGS, &devMode, NULL);
+    if (result == 0) {
+        m_sErrinf = "EnumDisplaySettingsEx failed";
+        return false;
+    }
 
     ShowDevMode(devMode);
 

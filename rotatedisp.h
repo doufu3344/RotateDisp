@@ -21,6 +21,7 @@ public:
     }Mode;
 
     RotateDisp();
+    RotateDisp(QString name);
 
     QString errmsg();
 

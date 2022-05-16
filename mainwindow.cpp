@@ -538,8 +538,8 @@ void MainWindow::rotate(RotateDisp::ROTATE r)
         return;
     }
 
-    RotateDisp rd;
     QString monitor = m_settings.value("monitor").toString();
+    RotateDisp rd(monitor);
     bool ret = rd.rotate(monitor, r);
     if (!ret) {
         qDebug() << rd.errmsg();
@@ -552,8 +552,9 @@ void MainWindow::rebuildRotateMap()
     if (r1 == GY_25T_TTL::ACC_UNKNOWN)
         return;
 
-    RotateDisp rd;
-    RotateDisp::ROTATE r2 = rd.getRotate(m_settings.value("monitor").toString());
+    QString monitor = m_settings.value("monitor").toString();
+    RotateDisp rd(monitor);
+    RotateDisp::ROTATE r2 = rd.getRotate(monitor);
 
     QVector<GY_25T_TTL::Rotate> ar1;
     ar1 << GY_25T_TTL::Rotate::ACC_UP
@@ -606,7 +607,7 @@ void MainWindow::retranslate()
         }
         newTrFileInfo = dir.entryInfoList(nameFilter);
     }
-    qDebug() << lang << newTrFileInfo;
+    //qDebug() << lang << newTrFileInfo;
     if (newTrFileInfo.isEmpty()) {
         return;
     }
