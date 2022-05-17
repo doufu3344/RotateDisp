@@ -46,7 +46,7 @@ private:
     int m_iAccIndex;
     int m_iAccCount;
     int** m_aAcc;
-    QMap<quint32, quint32> m_mpCount;
+    QMap<QString, quint32> m_mpCount;
 
 private slots:
     void onSerialPortReadyRead();

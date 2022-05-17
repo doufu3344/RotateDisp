@@ -335,6 +335,7 @@ void MainWindow::onGT_25_ready(bool ready)
         ui->pushButton_Open->setText(QApplication::translate("MainWindow", "Open"));
         ui->pushButton_Open->setIcon(QIcon("://pic/logo-red.png"));
         trayIcon->setIcon(QIcon("://pic/logo-red.png"));
+        m_bFirstR = true;
 
         show();
     }

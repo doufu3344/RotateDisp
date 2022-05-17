@@ -17,10 +17,12 @@ GY_25T_TTL::GY_25T_TTL(QObject* parent)
     m_iAccCount = 0;
     m_aAcc = new int* [3];
     for (int i = 0; i < 3; ++i) {
-        m_aAcc[i] = new int[ACC_WINDOW + 2];
-        for (int j = 0; j < ACC_WINDOW + 2; ++j)
+        m_aAcc[i] = new int[ACC_WINDOW + 1];
+        for (int j = 0; j < ACC_WINDOW + 1; ++j)
             m_aAcc[i][j] = 0;
+        m_aAcc[i][ACC_WINDOW + 1] = INT16_MAX;
     }
+    m_mpCount.clear();
 
     connect(this, &QSerialPort::readyRead, this, &GY_25T_TTL::onSerialPortReadyRead);
     connect(this, &QSerialPort::bytesWritten, this, &GY_25T_TTL::onSerialPortBytesWritten);
@@ -36,7 +38,18 @@ GY_25T_TTL::~GY_25T_TTL()
 
 bool GY_25T_TTL::init()
 {
+    m_aSyncWData.clear();
     m_nlastYaw = INT16_MIN;
+
+    m_iAccIndex = 0;
+    m_iAccCount = 0;
+    for (int i = 0; i < 3; ++i) {
+        m_aAcc[i] = new int[ACC_WINDOW + 1];
+        for (int j = 0; j < ACC_WINDOW + 1; ++j)
+            m_aAcc[i][j] = 0;
+        m_aAcc[i][ACC_WINDOW + 1] = INT16_MAX;
+    }
+    m_mpCount.clear();
 
     int ret = 0;
     if (isOpen()) {
@@ -323,7 +336,10 @@ bool GY_25T_TTL::handleBuffer_Acc(QByteArray& buf)
     //qDebug() << __FUNCTION__ << "avg_acc_x:"
     //         << m_aAcc[2][ACC_WINDOW] << m_aAcc[2][ACC_WINDOW + 1];
 
-    quint32 key = m_aAcc[0][ACC_WINDOW + 1] << 16 | (m_aAcc[1][ACC_WINDOW + 1]) << 8 | m_aAcc[2][ACC_WINDOW + 1];
+    QString key = QString("%1-%2-%3")
+        .arg(m_aAcc[0][ACC_WINDOW + 1])
+        .arg(m_aAcc[1][ACC_WINDOW + 1])
+        .arg(m_aAcc[2][ACC_WINDOW + 1]);
     auto it = m_mpCount.find(key);
     if (it == m_mpCount.end()) {
         m_mpCount.clear();
