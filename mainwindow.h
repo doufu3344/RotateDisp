@@ -46,7 +46,7 @@ private slots:
 
     void on_comboBox_Monitor_currentIndexChanged(int index);
     void on_checkBox_Auto_stateChanged(int state);
-    void on_checkBox_Reverse_stateChanged(int arg1);
+    void on_checkBox_Reverse_stateChanged(int state);
     void on_buttonGroup_Manu_buttonClicked(QAbstractButton* button);
 
     void onGT_25_rotated(GY_25T_TTL::Rotate r);
@@ -65,6 +65,8 @@ private:
 
     void rotate(RotateDisp::ROTATE r);
     void rebuildRotateMap();
+
+    void setMonitorState(RotateDisp::ROTATE r);
 
     void retranslate();
 

@@ -46,17 +46,24 @@
           </layout>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_Auto">
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="text">
-            <string>Automatic setting based on sensor</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QCheckBox" name="checkBox_Auto">
+             <property name="cursor">
+              <cursorShape>ArrowCursor</cursorShape>
+             </property>
+             <property name="text">
+              <string>Automatic setting based on sensor</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignRight|Qt::AlignVCenter">
+            <widget class="QLabel" name="label_GY25TState"/>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QCheckBox" name="checkBox_Reverse">
@@ -86,6 +93,9 @@
             </property>
             <property name="toolTip">
              <string>Ctrl + Up</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 2px solid #000000;</string>
             </property>
             <property name="text">
              <string/>
@@ -119,6 +129,9 @@
             <property name="toolTip">
              <string>Ctrl + Left</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">border: 2px solid #000000;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -151,6 +164,9 @@
             <property name="toolTip">
              <string>Ctrl + Right</string>
             </property>
+            <property name="styleSheet">
+             <string notr="true">border: 2px solid #000000;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -182,6 +198,9 @@
             </property>
             <property name="toolTip">
              <string>Ctrl + Down</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 2px solid #000000;</string>
             </property>
             <property name="text">
              <string>Default</string>
@@ -347,6 +366,8 @@
   </widget>
  </widget>
  <tabstops>
+  <tabstop>checkBox_Boot</tabstop>
+  <tabstop>pushButton_Refresh</tabstop>
   <tabstop>comboBox_Port</tabstop>
   <tabstop>comboBox_Baud</tabstop>
   <tabstop>comboBox_DataBits</tabstop>
@@ -355,10 +376,12 @@
   <tabstop>pushButton_Open</tabstop>
   <tabstop>comboBox_Monitor</tabstop>
   <tabstop>checkBox_Auto</tabstop>
+  <tabstop>checkBox_Reverse</tabstop>
   <tabstop>toolButton_Up</tabstop>
   <tabstop>toolButton_Left</tabstop>
-  <tabstop>toolButton_Down</tabstop>
   <tabstop>toolButton_Right</tabstop>
+  <tabstop>toolButton_Down</tabstop>
+  <tabstop>pushButton_Hide</tabstop>
  </tabstops>
  <resources>
   <include location="res.qrc"/>

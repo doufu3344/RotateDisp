@@ -232,6 +232,12 @@ void MainWindow::on_pushButton_Open_clicked()
 
         return;
     }
+    if (ui->comboBox_Port->currentText().isEmpty()) {
+        QMessageBox::critical(this,
+            QApplication::translate("MainWindow", "Error"),
+            QApplication::translate("MainWindow", "No device connected!"));
+        return;
+    }
 
     m_gy25t.setPortName(ui->comboBox_Port->currentText());
     m_gy25t.setBaudRate(ui->comboBox_Baud->currentData().toInt());
@@ -240,7 +246,8 @@ void MainWindow::on_pushButton_Open_clicked()
     m_gy25t.setStopBits((QSerialPort::StopBits)ui->comboBox_StopBits->currentData().toInt());
     if (m_gy25t.open(QIODevice::ReadWrite)) {
         // replace icon when opening
-        ui->pushButton_Open->setIcon(QIcon("://pic/logo.png"));
+        ui->pushButton_Open->setText(QApplication::translate("MainWindow", "Opening..."));
+        //ui->pushButton_Open->setIcon(QIcon("://pic/logo.png"));
         trayIcon->setIcon(QIcon("://pic/logo.png"));
 
         m_gy25t.init();
@@ -248,7 +255,10 @@ void MainWindow::on_pushButton_Open_clicked()
         setAutoBoot();
     }
     else {
-        qDebug() << "failed open device";
+        QMessageBox::critical(this,
+            QApplication::translate("MainWindow", "Error"),
+            QApplication::translate("MainWindow", "Open device failed!")
+            + QString("(%1)").arg(ui->comboBox_Port->currentText()));
     }
 }
 
@@ -256,8 +266,12 @@ void MainWindow::on_comboBox_Monitor_currentIndexChanged(int index)
 {
     qDebug() << __FUNCTION__ << index;
     RotateDisp rd;
-    QString name = rd.getMonitorName(index);
-    m_settings.setValue("monitor", name);
+    QString monitor = rd.getMonitorName(index);
+    m_settings.setValue("monitor", monitor);
+
+    RotateDisp rd1(monitor);
+    RotateDisp::ROTATE r = rd1.getRotate(monitor);
+    setMonitorState(r);
 
     //rebuildRotateMap();
 }
@@ -270,9 +284,9 @@ void MainWindow::on_checkBox_Auto_stateChanged(int state)
     }
 }
 
-void MainWindow::on_checkBox_Reverse_stateChanged(int arg1)
+void MainWindow::on_checkBox_Reverse_stateChanged(int state)
 {
-    Q_UNUSED(arg1);
+    Q_UNUSED(state);
     rebuildRotateMap();
 }
 
@@ -301,7 +315,7 @@ void MainWindow::on_buttonGroup_Manu_buttonClicked(QAbstractButton* button)
 
 void MainWindow::onGT_25_rotated(GY_25T_TTL::Rotate r)
 {
-    qDebug() << __FUNCTION__ << "gy25t rotate:" << r;
+    ui->label_GY25TState->setText(QString("(%1)").arg(r));
 
     if (!ui->checkBox_Auto->isChecked())
         return;
@@ -332,6 +346,7 @@ void MainWindow::onGT_25_ready(bool ready)
     }
     else {
         qDebug() << __FUNCTION__ << "false";
+        ui->label_GY25TState->clear();
         ui->pushButton_Open->setText(QApplication::translate("MainWindow", "Open"));
         ui->pushButton_Open->setIcon(QIcon("://pic/logo-red.png"));
         trayIcon->setIcon(QIcon("://pic/logo-red.png"));
@@ -545,6 +560,9 @@ void MainWindow::rotate(RotateDisp::ROTATE r)
     if (!ret) {
         qDebug() << rd.errmsg();
     }
+    else {
+        setMonitorState(r);
+    }
 }
 
 void MainWindow::rebuildRotateMap()
@@ -556,6 +574,7 @@ void MainWindow::rebuildRotateMap()
     QString monitor = m_settings.value("monitor").toString();
     RotateDisp rd(monitor);
     RotateDisp::ROTATE r2 = rd.getRotate(monitor);
+    setMonitorState(r2);
 
     QVector<GY_25T_TTL::Rotate> ar1;
     ar1 << GY_25T_TTL::Rotate::ACC_UP
@@ -585,6 +604,29 @@ void MainWindow::rebuildRotateMap()
         m_mpRotate[ar1[ii1]] = ar2[ii2];
     }
     qDebug() << __FUNCTION__ << "rotate map" << m_mpRotate;
+}
+
+void MainWindow::setMonitorState(RotateDisp::ROTATE r)
+{
+    ui->toolButton_Up->setStyleSheet("border: 2px solid #000000;");
+    ui->toolButton_Down->setStyleSheet("border: 2px solid #000000;");
+    ui->toolButton_Left->setStyleSheet("border: 2px solid #000000;");
+    ui->toolButton_Right->setStyleSheet("border: 2px solid #000000;");
+    switch (r)
+    {
+    case RotateDisp::ROTATE_180:
+        ui->toolButton_Up->setStyleSheet("border: 2px solid #00ff00;");
+        break;
+    case RotateDisp::ROTATE_DEFAULT:
+        ui->toolButton_Down->setStyleSheet("border: 2px solid #00ff00;");
+        break;
+    case RotateDisp::ROTATE_270:
+        ui->toolButton_Left->setStyleSheet("border: 2px solid #00ff00;");
+        break;
+    case RotateDisp::ROTATE_90:
+        ui->toolButton_Right->setStyleSheet("border: 2px solid #00ff00;");
+        break;
+    }
 }
 
 void MainWindow::retranslate()

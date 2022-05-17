@@ -147,5 +147,21 @@
         <source>Two</source>
         <translation>2位</translation>
     </message>
+    <message>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <source>No device connected!</source>
+        <translation>没有连接的设备！</translation>
+    </message>
+    <message>
+        <source>Opening...</source>
+        <translation>正在打开...</translation>
+    </message>
+    <message>
+        <source>Open device failed!</source>
+        <translation>打开设备失败！</translation>
+    </message>
 </context>
 </TS>
