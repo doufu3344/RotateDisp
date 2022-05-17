@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     ui->checkBox_Boot->setChecked(m_settings.value("AutoBoot", false).toBool());
+    ui->checkBox_Auto->setChecked(m_settings.value("autoRotate", false).toBool());
+    ui->checkBox_Reverse->setChecked(m_settings.value("reverse", false).toBool());
 
     trayIconMenu = nullptr;
     trayIcon = nullptr;
@@ -279,6 +281,7 @@ void MainWindow::on_comboBox_Monitor_currentIndexChanged(int index)
 void MainWindow::on_checkBox_Auto_stateChanged(int state)
 {
     qDebug() << __FUNCTION__ << state;
+    m_settings.setValue("autoRotate", state == Qt::CheckState::Checked);
     if (state == Qt::CheckState::Checked) {
         rebuildRotateMap();
     }
@@ -286,7 +289,7 @@ void MainWindow::on_checkBox_Auto_stateChanged(int state)
 
 void MainWindow::on_checkBox_Reverse_stateChanged(int state)
 {
-    Q_UNUSED(state);
+    m_settings.setValue("reverse", state == Qt::CheckState::Checked);
     rebuildRotateMap();
 }
 
@@ -524,6 +527,8 @@ void MainWindow::initMonitor()
     RotateDisp rd;
     int count = rd.getMonitorCount();
 
+    QString monitor = m_settings.value("monitor").toString();
+    int index = -1;
     // fill monitor
     ui->comboBox_Monitor->clear();
     for (int i = 0; i < count; ++i) {
@@ -531,8 +536,15 @@ void MainWindow::initMonitor()
 
         QString name = rd.getMonitorName(i);
         ui->comboBox_Monitor->addItem(name, i);
+
+        if (monitor == name)
+            index = i;
     }
-    on_comboBox_Monitor_currentIndexChanged(0);
+    if (index < 0 && ui->comboBox_Monitor->count() > 0)
+        index = 0;
+
+    if (index >= 0 && index < ui->comboBox_Monitor->count())
+        on_comboBox_Monitor_currentIndexChanged(index);
 }
 
 void MainWindow::enableSettings(bool enable)
