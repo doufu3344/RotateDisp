@@ -1,10 +1,8 @@
 ; usage:
-;    1: copy an image(installer.ico) to to the same directory of this script file,
-;       which is installer's icon.
-;    2. make a folder named RotateDisp-installer;
-;    3. copy RotateDisp.exe to this folder.
-;    4: use windeployqt.exe RotateDisp.exe command to copy all of qt dependcies.
-;    5: 
+;    1: copy output file RotateDisp.exe to RotateDisp-installer folder.
+;    2: use windeployqt.exe RotateDisp.exe to copy all of qt dependcies.
+;    3: and/remove *.qm file in translations folder.
+;    4: compile this file using NSIS compilor.
 
 ; Unicode True
 
@@ -12,12 +10,17 @@ RequestExecutionLevel user
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "RotateDisp"
-!define PRODUCT_VERSION "1.0"
+!define PRODUCT_VERSION "1.2"
 !define PRODUCT_PUBLISHER "doufu"
 !define PRODUCT_WEB_SITE "doufu.de"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\RotateDisp.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKCU"
+
+!define AUTOBOOT_REGKEY "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+; ${PRODUCT_PUBLISHER} is same as QSetting in mainwindows.cpp
+!define SOFTSETTINGS_REGKEY "SOFTWARE\${PRODUCT_PUBLISHER}"
+!define PRODUCT_SETTINGS_REGKEY "${SOFTSETTINGS_REGKEY}\${PRODUCT_NAME}"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -50,9 +53,9 @@ RequestExecutionLevel user
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "RotateDisp-installer.exe"
-InstallDir "$LOCALAPPDATA\RotateDisp"
-InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
+OutFile "${PRODUCT_NAME}-v${PRODUCT_VERSION}-installer.exe"
+InstallDir "$LOCALAPPDATA\${PRODUCT_NAME}"
+InstallDirRegKey HKCU "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -67,7 +70,11 @@ LangString UNINSTALL_CONFIRM ${LANG_SIMPCHINESE} "你确定要移除 $(^Name)？"
 LangString VCREDIRT_INSTALL ${LANG_ENGLISH} "VisualC++ runtime library is not installed on this system, start the installation"
 LangString VCREDIRT_INSTALL ${LANG_SIMPCHINESE} "此系统未安装VisualC++运行时库，开始安装"
 
+LangString UNINSTALL_RMBOOT ${LANG_ENGLISH} "Remove auto-boot setting"
+LangString UNINSTALL_RMBOOT ${LANG_SIMPCHINESE} "移除自动启动设置"
 
+LangString UNINSTALL_RMSETTING ${LANG_ENGLISH} "Remove custom settings"
+LangString UNINSTALL_RMSETTING ${LANG_SIMPCHINESE} "移除用户自定义设置"
 
 Function .onInit
   #选择语言
@@ -138,10 +145,10 @@ Section -Post
   ExecWait "$INSTDIR\vc_redist.x86.exe"
 
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\GY25T.exe"
+  WriteRegStr HKCU "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\RotateDisp.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\GY25T.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\RotateDisp.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
@@ -156,6 +163,17 @@ Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(UNINSTALL_CONFIRM)" IDYES +2
   Abort
+FunctionEnd
+
+Function un.CheckRegValExist
+  Pop $R0
+  ClearErrors
+  ReadRegStr $1 HKCU "$R0" "${PRODUCT_NAME}"
+  ${If} ${Errors}
+    Push 0
+  ${Else}
+    Push 1
+  ${EndIf}
 FunctionEnd
 
 Section Uninstall
@@ -200,7 +218,20 @@ Section Uninstall
   RMDir "$INSTDIR\iconengines"
   RMDir /r "$INSTDIR"
 
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
-  SetAutoClose true
+  Push "${AUTOBOOT_REGKEY}"  
+  Call un.CheckRegValExist
+  Pop $0
+  ${If} $0 == 1
+    DetailPrint "$(UNINSTALL_RMBOOT)"
+    DeleteRegValue HKCU "${AUTOBOOT_REGKEY}" ${PRODUCT_NAME}
+  ${EndIf}
+
+  DetailPrint "$(UNINSTALL_RMSETTING)"
+  DeleteRegKey HKCU "${PRODUCT_SETTINGS_REGKEY}"
+  DeleteRegKey /ifempty HKCU "${SOFTSETTINGS_REGKEY}"
+
+  DeleteRegKey HKCU "${PRODUCT_UNINST_KEY}"
+  DeleteRegKey HKCU "${PRODUCT_DIR_REGKEY}"
+  ;SetAutoClose true
+  SetAutoClose false
 SectionEnd

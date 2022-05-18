@@ -17,4 +17,4 @@ debug/
 release/
 
 installer/RotateDisp-installer/
-installer/RotateDisp-installer.exe
+installer/*.exe
